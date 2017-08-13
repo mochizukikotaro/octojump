@@ -41,24 +41,34 @@ keyword.addEventListener('keyup', function(){
   setTimeout(function(){
     keyup_stack.pop()
     if (keyup_stack.length === 0) {
-      // Do something!
-      console.log(this.value)
       searchRepositories(this.value)
     }
   }.bind(this), 300)
 })
 
 const searchRepositories = (word) => {
-  console.log('search:');
-  console.log(word);
   var buf = '.*' + word.replace(/(.)/g, '$1.*')
   var reg = new RegExp(buf);
   const list = full_names.filter((d) => {
     return reg.test(d)
   })
-  console.log(list);
+
+
+  // NOTE: It's not "for in" :)
+  const ul = document.getElementById('Ul')
+  // NOTE: I think it's better than removeChild.
+  ul.innerHTML = ''
+  for (const repo of list) {
+    appendLink(repo, ul)
+  }
 }
 
+var appendLink = (repo, ul) => {
+  const li = document.createElement('li')
+  li.innerText = repo
+  console.log(li);
+  ul.appendChild(li)
+}
 
 
 
