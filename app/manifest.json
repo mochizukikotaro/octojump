@@ -29,7 +29,7 @@
     "_execute_browser_action": {
       "suggested_key": {
         "windows": "Ctrl+Shift+Y",
-        "mac": "Command+Shift+A",
+        "mac": "Command+K",
         "chromeos": "Ctrl+Shift+U",
         "linux": "Ctrl+Shift+J"
       }

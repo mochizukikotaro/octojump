@@ -16,17 +16,41 @@ button.addEventListener('click', function(){
 let keyup_stack = []
 const keyword = document.getElementById('Search')
 keyword.addEventListener('keyup', function(){
-  keyup_stack.push(1)
-  setTimeout(function(){
-    keyup_stack.pop()
-    if (keyup_stack.length === 0) {
-      searchRepositories(this.value)
-    }
-  }.bind(this), 300)
+
+  // When click Enter key
+  if (event.keyCode === 13) { // 知見
+    const focus = document.getElementById('focus')
+    document.getElementById('focus').click();
+
+  // Down
+  } else if (event.keyCode === 40) {
+    const focus = document.getElementById('focus')
+    focus.id = ''
+    focus.nextElementSibling.id = 'focus'
+
+  // Up
+  // todo:
+  } else if (event.keyCode === 38) {
+    console.log('Up!');
+    const focus = document.getElementById('focus')
+    focus.id = ''
+    focus.previousElementSibling.id = 'focus'
+
+  // Other key
+  } else {
+    keyup_stack.push(1)
+    setTimeout(function(){
+      keyup_stack.pop()
+      if (keyup_stack.length === 0) {
+        searchRepositories(this.value)
+      }
+    }.bind(this), 300)
+  }
+
 })
 
 const searchRepositories = (word) => {
-  var buf = '.*' + word.replace(/(.)/g, '$1.*')
+  var buf = word.replace(/\//, '.*\/.*').replace(/(.*)/, '.*$1.*')
   var reg = new RegExp(buf);
   const list = full_names.filter((d) => {
     return reg.test(d)
@@ -44,8 +68,12 @@ const searchRepositories = (word) => {
 
 var appendLink = (i, repo, ul) => {
   const li = document.createElement('li')
-  li.innerHTML = '<span data-repo="' + repo + '">' + repo + '</span>'
-  if (i === 0) { li.className = 'focus' }
+  li.innerText = repo
+  li.dataset.repo = repo // 知見
+  if (i === 0) {
+    li.id = 'focus' // 知見
+  }
+
   ul.appendChild(li)
 }
 
@@ -53,7 +81,7 @@ var addEventForClick = () => {
   const repos = document.querySelectorAll('[data-repo]')
   Array.from(repos).forEach(repo => {
     repo.addEventListener('click', function(event) {
-      event.preventDefault();
+      // event.preventDefault();
       console.log(this.dataset.repo);
       const full_name = this.dataset.repo
 
