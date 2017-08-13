@@ -11,27 +11,6 @@ button.addEventListener('click', function(){
   chrome.storage.sync.set({'token': input});
 })
 
-// Click button2
-const button2 = document.getElementById('Button2')
-button2.addEventListener('click', () => {
-  console.log('Click button2:');
-  console.log(full_names);
-  const html = '<div data-repo="' + full_names[20] + '">hoge</div>'
-  document.getElementById('FullName').innerHTML = html
-
-  const repos = document.querySelectorAll('[data-repo]')
-  Array.from(repos).forEach(repo => {
-    repo.addEventListener('click', function(event) {
-      event.preventDefault();
-      console.log(this.dataset.repo);
-      const full_name = this.dataset.repo
-
-      // NOTE: 新しいタブが開く
-      chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
-    });
-  });
-})
-
 
 // Keyup
 let keyup_stack = []
