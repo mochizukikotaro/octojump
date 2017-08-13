@@ -65,9 +65,21 @@ const searchRepositories = (word) => {
 
 var appendLink = (repo, ul) => {
   const li = document.createElement('li')
-  li.innerText = repo
-  console.log(li);
+  li.innerHTML = '<span data-repo="' + repo + '">' + repo + '</span>'
   ul.appendChild(li)
+
+  // TODO: I wanna move this logic to another method.
+  const repos = document.querySelectorAll('[data-repo]')
+  Array.from(repos).forEach(repo => {
+    repo.addEventListener('click', function(event) {
+      event.preventDefault();
+      console.log(this.dataset.repo);
+      const full_name = this.dataset.repo
+
+      // NOTE: 新しいタブが開く
+      chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
+    });
+  });
 }
 
 
