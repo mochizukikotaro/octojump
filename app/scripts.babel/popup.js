@@ -1,22 +1,57 @@
 'use strict';
 
+// Repository full_name array
+let full_names = []
 
-// Click event
-document.getElementById('Button').addEventListener(
-                                    'click', function(){
-  var input = document.getElementById('Input').value
+
+// Set Access TOKEN
+const button = document.getElementById('Button')
+button.addEventListener('click', function(){
+  const input = document.getElementById('Input').value
   chrome.storage.sync.set({'token': input});
+})
+
+// Click button2
+const button2 = document.getElementById('Button2')
+button2.addEventListener('click', () => {
+  console.log('Click button2:');
+  console.log(full_names);
+  document.getElementById('FullName').innerText = full_names[10]
 })
 
 
 // DOMContentLoaded
-document.addEventListener("DOMContentLoaded", function(e) {
+document.addEventListener('DOMContentLoaded', function(e) {
 
   var token
   chrome.storage.sync.get('token', function(v){
     token = v.token
     setCode(token)
-    getRepos(token)
+    let last_page = 1
+
+    asyncGetRequest(token).then((xhr) => {
+      const link = xhr.getResponseHeader('link')
+      last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
+      return last_page
+    }).then((last_page) => {
+      let promises = []
+
+      for (let i=1; i<last_page+1; i++) {
+
+        // It's not correct order...
+        promises.push(asyncGetRequestWithPage(token, i).then((xhr) => {
+          const ary = JSON.parse(xhr.responseText)
+          for (const v of ary) {
+            full_names.push(v.full_name)
+          }
+        }));
+      } // end for
+
+      Promise.all(promises).then(() => {
+        console.log(full_names);
+      })
+
+    })
   });
 
   // Set code value to DOM
@@ -24,29 +59,25 @@ document.addEventListener("DOMContentLoaded", function(e) {
     document.getElementById('Code').innerText = code
   }
 
-  var getRepos = (token) => {
-    var xhr = new XMLHttpRequest()
-    xhr.open('GET', 'https://api.github.com/user/repos?per_page=100')
-    xhr.setRequestHeader('Authorization', 'token ' + token);
-    xhr.onload = function(){
+  // Oh God, Promise :)
+  const asyncGetRequest = (token) => {
+    return new Promise((resolve, reject) => {
+      var xhr = new XMLHttpRequest()
+      xhr.open('GET', 'https://api.github.com/user/repos?per_page=100')
+      xhr.setRequestHeader('Authorization', 'token ' + token);
+      xhr.onload = () => resolve(xhr)
+      xhr.send()
+    })
+  }
 
-      // 知見
-      const link = xhr.getResponseHeader("link")
-
-      // 知見
-      const last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
-      console.log(link);
-      console.log(last_page);
-
-
-      var ary = JSON.parse(xhr.responseText)
-      console.log(ary.length);
-      console.log(xhr.responseHeader);
-      for (const v of ary) {
-        //console.log(v.full_name);
-      }
-    }
-    xhr.send()
+  const asyncGetRequestWithPage = (token, page) => {
+    return new Promise((resolve, reject) => {
+      var xhr = new XMLHttpRequest()
+      xhr.open('GET', 'https://api.github.com/user/repos?per_page=100' + '&page=' + String(page))
+      xhr.setRequestHeader('Authorization', 'token ' + token);
+      xhr.onload = () => resolve(xhr)
+      xhr.send()
+    })
   }
 
 });
