@@ -27,11 +27,37 @@ button2.addEventListener('click', () => {
       const full_name = this.dataset.repo
 
       // NOTE: 新しいタブが開く
-      chrome.tabs.create({ url: "https://github.com/" + full_name + "/"})
+      chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
     });
   });
 })
 
+
+// Keyup
+let keyup_stack = []
+const keyword = document.getElementById('Search')
+keyword.addEventListener('keyup', function(){
+  keyup_stack.push(1)
+  setTimeout(function(){
+    keyup_stack.pop()
+    if (keyup_stack.length === 0) {
+      // Do something!
+      console.log(this.value)
+      searchRepositories(this.value)
+    }
+  }.bind(this), 300)
+})
+
+const searchRepositories = (word) => {
+  console.log('search:');
+  console.log(word);
+  var buf = '.*' + word.replace(/(.)/g, '$1.*')
+  var reg = new RegExp(buf);
+  const list = full_names.filter((d) => {
+    return reg.test(d)
+  })
+  console.log(list);
+}
 
 
 
