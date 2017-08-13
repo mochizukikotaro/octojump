@@ -50,7 +50,8 @@ keyword.addEventListener('keyup', function(){
 })
 
 const searchRepositories = (word) => {
-  var buf = word.replace(/\//, '.*\/.*').replace(/(.*)/, '.*$1.*')
+  var buf = word.replace(/\//, '.*\/.*')
+                .replace(/(.*)/, '.*$1.*')
   var reg = new RegExp(buf);
   const list = full_names.filter((d) => {
     return reg.test(d)
