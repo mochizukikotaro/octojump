@@ -32,22 +32,24 @@ const searchRepositories = (word) => {
     return reg.test(d)
   })
 
-
   // NOTE: It's not "for in" :)
   const ul = document.getElementById('Ul')
   // NOTE: I think it's better than removeChild.
   ul.innerHTML = ''
-  for (const repo of list) {
-    appendLink(repo, ul)
+  for (const [i, repo] of list.entries()) {
+    appendLink(i, repo, ul)
   }
+  addEventForClick()
 }
 
-var appendLink = (repo, ul) => {
+var appendLink = (i, repo, ul) => {
   const li = document.createElement('li')
   li.innerHTML = '<span data-repo="' + repo + '">' + repo + '</span>'
+  if (i === 0) { li.className = 'focus' }
   ul.appendChild(li)
+}
 
-  // TODO: I wanna move this logic to another method.
+var addEventForClick = () => {
   const repos = document.querySelectorAll('[data-repo]')
   Array.from(repos).forEach(repo => {
     repo.addEventListener('click', function(event) {
@@ -60,8 +62,6 @@ var appendLink = (repo, ul) => {
     });
   });
 }
-
-
 
 // DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function(e) {
