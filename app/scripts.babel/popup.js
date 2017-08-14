@@ -25,14 +25,14 @@ keyword.addEventListener('keyup', function(){
   // Down
   } else if (event.keyCode === 40) {
     const focus = document.getElementById('focus')
+    if (!focus.nextElementSibling) { return }
     focus.id = ''
     focus.nextElementSibling.id = 'focus'
 
   // Up
-  // todo:
   } else if (event.keyCode === 38) {
-    console.log('Up!');
     const focus = document.getElementById('focus')
+    if (!focus.previousElementSibling) { return }
     focus.id = ''
     focus.previousElementSibling.id = 'focus'
 
