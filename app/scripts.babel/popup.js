@@ -98,7 +98,6 @@ document.addEventListener('DOMContentLoaded', function(e) {
   var token
   chrome.storage.sync.get('token', function(v){
     token = v.token
-    setCode(token)
     let last_page = 1
 
     asyncGetRequest(token).then((xhr) => {
@@ -126,10 +125,6 @@ document.addEventListener('DOMContentLoaded', function(e) {
     })
   });
 
-  // Set code value to DOM
-  var setCode = (code) => {
-    document.getElementById('Code').innerText = code
-  }
 
   // Oh God, Promise :)
   const asyncGetRequest = (token) => {
