@@ -1,6 +1,6 @@
 {
   "name": "Octojump",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "manifest_version": 2,
   "description": "Jump to GitHub repository page.",
   "icons": {
@@ -28,10 +28,10 @@
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "windows": "Ctrl+Shift+Y",
-        "mac": "Command+Shift+K",
-        "chromeos": "Ctrl+Shift+U",
-        "linux": "Ctrl+Shift+J"
+        "windows": "Ctrl+K",
+        "mac": "Command+K",
+        "chromeos": "Ctrl+K",
+        "linux": "Ctrl+K"
       }
     }
   }

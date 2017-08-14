@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(details => {
   console.log('previousVersion', details.previousVersion);
 });
 
-chrome.browserAction.setBadgeText({text: 'CSK'});
+chrome.browserAction.setBadgeText({text: '⌘+K'});
 
 console.log('\'Allo \'Allo! Event Page for Browser Action');
 
