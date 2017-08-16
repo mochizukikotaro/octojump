@@ -11,15 +11,16 @@
     <!-- endbuild -->
   </head>
   <body>
-    <h1>Octojump!</h1>
+    <h1>Octojump</h1>
 
+    <div id="Info"></div>
     <input id="Search" type="text" name="" value="">
     <ul id="Ul"></ul>
 
     <input id="Input" type="text" name="" value="" placeholder="token">
-    <button id="Button">Set</button>
-    <button id="CheckToken">Check token</button>
-    <div id="Code"></div>
+    <button id="SetBtn">Set</button>
+    <button id="CheckBtn">Check token</button>
+    <div id="CheckBox"></div>
 
     <!-- build:js scripts/popup-vendor.js -->
     <!-- bower:js -->
@@ -27,8 +28,8 @@
     <!-- endbuild -->
 
     <!-- build:js scripts/popup.js -->
-    <script src="scripts/popup.js"></script>
     <script src="scripts/token.js"></script>
+    <script src="scripts/popup.js"></script>
     <!-- endbuild -->
   </body>
 </html>
