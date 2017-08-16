@@ -4,14 +4,6 @@
 let full_names = []
 
 
-// Set Access TOKEN
-const button = document.getElementById('Button')
-button.addEventListener('click', function(){
-  const input = document.getElementById('Input').value
-  chrome.storage.sync.set({'token': input});
-})
-
-
 // Keyup
 let keyup_stack = []
 const keyword = document.getElementById('Search')

@@ -12,5 +12,11 @@ h1 {
   background-color: #faa;
 }
 
+#Search {
+  &.disable {
+    display: none
+  }
+}
+
 
 // 45afdf8d35ad54ebd25f44e4357fba3d03cc808e

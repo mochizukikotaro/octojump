@@ -6,22 +6,65 @@
 
 'use strict'
 
-const checkToken = document.getElementById('CheckToken')
+let token = '' // この名前わかりづらいかも
+const input    = document.getElementById('Input')
+const setBtn   = document.getElementById('SetBtn')
+const checkBtn = document.getElementById('CheckBtn')
+const info     = document.getElementById('Info')
+const search   = document.getElementById('Search')
 
-let token = ''
-
+// DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
-  chrome.storage.sync.get('token', (v) => {
-    token = v.token
+  loadToken().then((token) => {
+    setSearchInput(token)
   })
 })
 
-checkToken.addEventListener('click', () => {
-  console.log(token);
-  setCode(token)
+// Set Token
+setBtn.addEventListener('click', () => {
+  const value = input.value
+  chrome.storage.sync.set({'token': value});
+  setSearchInput(value)
+  input.value = ''
 })
 
-// Set code value to DOM
-var setCode = (code) => {
-  document.getElementById('Code').innerText = code
+// Check Token
+checkBtn.addEventListener('click', () => {
+  loadToken().then((token) => {
+    displayToken(token)
+  })
+})
+
+const disableSearch = () => {
+  info.innerText = 'Set your access token'
+  search.className = 'disable'
+}
+
+const enableSearch = () => {
+  info.innerHTML = ''
+  search.className = ''
+}
+
+const displayToken = (token) => {
+  const v = token || 'token is undefined'
+  alert(v)
+}
+
+const setSearchInput = (token) => {
+  if ((typeof token === 'undefined') ||
+              token.trim().length === 0) {
+    disableSearch()
+  } else {
+    enableSearch()
+  }
+}
+
+// Load token
+const loadToken = () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get('token', (v) => {
+      token = v.token
+      resolve(token)
+    })
+  })
 }
