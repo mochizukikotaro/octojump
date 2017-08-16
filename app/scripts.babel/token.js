@@ -7,11 +7,12 @@
 'use strict'
 
 let token = '' // この名前わかりづらいかも
+const info     = document.getElementById('Info')
+const search   = document.getElementById('Search')
 const input    = document.getElementById('Input')
 const setBtn   = document.getElementById('SetBtn')
 const checkBtn = document.getElementById('CheckBtn')
-const info     = document.getElementById('Info')
-const search   = document.getElementById('Search')
+const checkBox = document.getElementById('CheckBox')
 
 // DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,7 +48,7 @@ const enableSearch = () => {
 
 const displayToken = (token) => {
   const v = token || 'token is undefined'
-  alert(v)
+  checkBox.innerText = v
 }
 
 const setSearchInput = (token) => {
