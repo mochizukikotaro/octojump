@@ -9,10 +9,8 @@
   },
   "default_locale": "en",
   "background": {
-    "persistent": false,
     "scripts": [
       "scripts/chromereload.js",
-      "scripts/eventPage.js",
       "scripts/background.js"
     ]
   },

@@ -10,10 +10,18 @@ const ul = document.getElementById('Ul')
 document.addEventListener('DOMContentLoaded', (e) => {
 
   // ここで eventPage のデータを入れてしまう作戦
-  chrome.storage.sync.get('data', (v) => {
-    console.log('data');
-    console.log(v.data);
-    full_names = v.data
+  chrome.storage.sync.get('full_names', (v) => {
+    console.log('full_names');
+    console.log(v.full_names);
+    full_names = v.full_names
+
+    // ここで初期表示
+    const list = full_names
+    ul.innerHTML = ''
+    for (const [i, repo] of list.entries()) {
+      appendLink(i, repo, ul)
+    }
+    addEventForClick()
   })
 
   chrome.storage.sync.get('token', (v) => {
@@ -42,6 +50,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         // このタイミングで 毎回 popup へのアクセスで更新しているが、
         // 気にしない :)
         full_names = names
+        chrome.storage.sync.set({'full_names': full_names})
       })
     })
   });
