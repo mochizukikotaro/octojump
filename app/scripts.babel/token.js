@@ -23,18 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Set Token
 setBtn.addEventListener('click', () => {
-  const value = input.value
-  chrome.storage.sync.set({'token': value});
-
-  requestGithub().then((full_names)=>{
-    // いいぞ！
-    // ここで、full_names を storage に入れたりするんだ！
-    setSearchInput(value)
+  const token = input.value
+  requestGithub(token).then((full_names)=>{
+    setSearchInput(token)
     input.value = ''
     chrome.storage.sync.set({'full_names': full_names})
+    console.log('requestGithub が成功');
     console.log(full_names);
+    chrome.storage.sync.set({'token': token});
   }, () => {
-    console.log('error');
+    console.log('requestGithub が失敗');
   })
 
 })
@@ -44,16 +42,26 @@ setBtn.addEventListener('click', () => {
 // ここが一番重要で重い処理
 // token セット時 storage に入れちゃう作戦
 ////////////////////////////////////
-const requestGithub = () => {
+const requestGithub = (token) => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get('token', (v) => {
-      const token = v.token
-      let last_page = 1
-      asyncGetRequest(token).then((xhr) => {
+    let last_page = 1
+    asyncGetRequest(token)
+      .then((xhr) => {
+        const message = JSON.parse(xhr.responseText)['message']
+
+        ////////////////////
+        // token が正しくない場合！！！　これがやりたい
+        if (typeof message !== undefined &&
+            message === 'Bad credentials') {
+          console.log(message);
+          reject()
+          return
+        }
+        ////////////////////
+
+
         const link = xhr.getResponseHeader('link')
-        last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
-        return last_page
-      }).then((last_page) => {
+        const last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
         let promises = []
         let names = []
         for (let i=1; i<last_page+1; i++) {
@@ -66,19 +74,11 @@ const requestGithub = () => {
             }
           }));
         } // end for
-
         Promise.all(promises).then(() => {
-          // このタイミングで 毎回 popup へのアクセスで更新しているが、
-          // 気にしない :)
           full_names = names
-
-          // NOTE: このタイミングでいけてほしいという
-          // 強い気持ちがあります。
           resolve(full_names)
         })
-      })
     })
-
   })
 }
 
