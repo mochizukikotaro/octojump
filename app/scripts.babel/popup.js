@@ -5,6 +5,7 @@ let full_names = []
 
 let token = '' // この名前わかりづらいかも
 const info     = document.getElementById('Info')
+const loading  = document.getElementById('Loading')
 const search   = document.getElementById('Search')
 const input    = document.getElementById('Input')
 const setBtn   = document.getElementById('SetBtn')
@@ -48,8 +49,10 @@ const updateFullNames = (token) => {
     console.log(full_names);
     // TODO: // ここはちょっと冗長。。。。
     chrome.storage.sync.set({'token': token})
+    loading.className = 'disable'
   }, () => {
     console.log('requestGithub が失敗です');
+    loading.className = 'disable'
   })
 }
 
@@ -209,6 +212,7 @@ const loadToken = () => {
 
 // Set Token
 setBtn.addEventListener('click', () => {
+  loading.className = ''
   const token = input.value
   // 地球のはじまり
   updateFullNames(token)

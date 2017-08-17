@@ -2,6 +2,7 @@ $padding: 20px;
 body {
   width: 300px;
   padding: $padding;
+  position: relative;
 }
 
 h1 {
@@ -18,5 +19,14 @@ h1 {
   }
 }
 
+#Loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  &.disable {
+    display: none;
+  }
+}
 
 // 45afdf8d35ad54ebd25f44e4357fba3d03cc808e
