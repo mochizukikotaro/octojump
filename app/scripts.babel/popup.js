@@ -9,7 +9,7 @@ const ul = document.getElementById('Ul')
 // DOMContentLoaded
 document.addEventListener('DOMContentLoaded', (e) => {
 
-  // ここで eventPage のデータを入れてしまう作戦
+  // ここで データを入れてしまう作戦
   chrome.storage.sync.get('full_names', (v) => {
     console.log('full_names');
     console.log(v.full_names);
@@ -24,54 +24,74 @@ document.addEventListener('DOMContentLoaded', (e) => {
     addEventForClick()
   })
 
+  // popup が開くたびに更新の戦略。
   chrome.storage.sync.get('token', (v) => {
     const token = v.token
-    let last_page = 1
+    requestGithub(token).then((names)=>{
+      setSearchInput(token)
+      input.value = ''
+      chrome.storage.sync.set({'full_names': names})
 
-    asyncGetRequest(token).then((xhr) => {
-      const link = xhr.getResponseHeader('link')
-      last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
-      return last_page
-    }).then((last_page) => {
-      let promises = []
-      let names = []
-      for (let i=1; i<last_page+1; i++) {
-
-        // It's not correct order...
-        promises.push(asyncGetRequestWithPage(token, i).then((xhr) => {
-          const ary = JSON.parse(xhr.responseText)
-          for (const v of ary) {
-            names.push(v.full_name)
-          }
-        }));
-      } // end for
-
-      Promise.all(promises).then(() => {
-        // このタイミングで 毎回 popup へのアクセスで更新しているが、
-        // 気にしない :)
-        full_names = names
-        chrome.storage.sync.set({'full_names': full_names})
-      })
+      // NOTE: この一行が token.js とことなる。
+      full_names = names
+      console.log('requestGithub が成功');
+      console.log(full_names);
+    }, () => {
+      console.log('requestGithub が失敗');
     })
-  });
-});
+  })
+})
 
-
-// Oh God, Promise :)
-const asyncGetRequest = (token) => {
+////////////////////////////////////
+// ここが一番重要で重い処理
+// token セット時 storage に入れちゃう作戦
+////////////////////////////////////
+const requestGithub = (token) => {
   return new Promise((resolve, reject) => {
-    var xhr = new XMLHttpRequest()
-    xhr.open('GET', 'https://api.github.com/user/repos?per_page=100')
-    xhr.setRequestHeader('Authorization', 'token ' + token);
-    xhr.onload = () => resolve(xhr)
-    xhr.send()
+    let last_page = 1
+    asyncGetRequestWithPage(token, 1)
+      .then((xhr) => {
+        const message = JSON.parse(xhr.responseText)['message']
+
+        ////////////////////
+        // token が正しくない場合！！！　これがやりたい
+        if (typeof message !== undefined &&
+            message === 'Bad credentials') {
+          console.log(message);
+          reject()
+          return
+        }
+        ////////////////////
+
+
+        const link = xhr.getResponseHeader('link')
+        const last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
+        let promises = []
+        let names = []
+        for (let i=1; i<last_page+1; i++) {
+
+          // It's not correct order...
+          promises.push(asyncGetRequestWithPage(token, i).then((xhr) => {
+            const ary = JSON.parse(xhr.responseText)
+            for (const v of ary) {
+              names.push(v.full_name)
+            }
+          }));
+        } // end for
+        Promise.all(promises).then(() => {
+          full_names = names
+          resolve(full_names)
+        })
+    })
   })
 }
 
 const asyncGetRequestWithPage = (token, page) => {
   return new Promise((resolve, reject) => {
     var xhr = new XMLHttpRequest()
-    xhr.open('GET', 'https://api.github.com/user/repos?per_page=100' + '&page=' + String(page))
+    const url = 'https://api.github.com/user/repos?per_page=100'
+                + '&page=' + String(page)
+    xhr.open('GET', url)
     xhr.setRequestHeader('Authorization', 'token ' + token);
     xhr.onload = () => resolve(xhr)
     xhr.send()

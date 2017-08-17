@@ -45,7 +45,7 @@ setBtn.addEventListener('click', () => {
 const requestGithub = (token) => {
   return new Promise((resolve, reject) => {
     let last_page = 1
-    asyncGetRequest(token)
+    asyncGetRequestWithPage(token, 1)
       .then((xhr) => {
         const message = JSON.parse(xhr.responseText)['message']
 
@@ -82,25 +82,16 @@ const requestGithub = (token) => {
   })
 }
 
-// Oh God, Promise :)
-const asyncGetRequest = (token) => {
-return new Promise((resolve, reject) => {
-  var xhr = new XMLHttpRequest()
-  xhr.open('GET', 'https://api.github.com/user/repos?per_page=100')
-  xhr.setRequestHeader('Authorization', 'token ' + token);
-  xhr.onload = () => resolve(xhr)
-  xhr.send()
-})
-}
-
 const asyncGetRequestWithPage = (token, page) => {
-return new Promise((resolve, reject) => {
-  var xhr = new XMLHttpRequest()
-  xhr.open('GET', 'https://api.github.com/user/repos?per_page=100' + '&page=' + String(page))
-  xhr.setRequestHeader('Authorization', 'token ' + token);
-  xhr.onload = () => resolve(xhr)
-  xhr.send()
-})
+  return new Promise((resolve, reject) => {
+    var xhr = new XMLHttpRequest()
+    const url = 'https://api.github.com/user/repos?per_page=100'
+                + '&page=' + String(page)
+    xhr.open('GET', url)
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.onload = () => resolve(xhr)
+    xhr.send()
+  })
 }
 
 // Check Token
