@@ -3,6 +3,72 @@
 // Repository full_name array
 let full_names = []
 
+const ul = document.getElementById('Ul')
+
+
+// DOMContentLoaded
+document.addEventListener('DOMContentLoaded', (e) => {
+
+  // ここで eventPage のデータを入れてしまう作戦
+  chrome.storage.sync.get('data', (v) => {
+    console.log('data');
+    console.log(v.data);
+    full_names = v.data
+  })
+
+  chrome.storage.sync.get('token', (v) => {
+    const token = v.token
+    let last_page = 1
+
+    asyncGetRequest(token).then((xhr) => {
+      const link = xhr.getResponseHeader('link')
+      last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
+      return last_page
+    }).then((last_page) => {
+      let promises = []
+      let names = []
+      for (let i=1; i<last_page+1; i++) {
+
+        // It's not correct order...
+        promises.push(asyncGetRequestWithPage(token, i).then((xhr) => {
+          const ary = JSON.parse(xhr.responseText)
+          for (const v of ary) {
+            names.push(v.full_name)
+          }
+        }));
+      } // end for
+
+      Promise.all(promises).then(() => {
+        // このタイミングで 毎回 popup へのアクセスで更新しているが、
+        // 気にしない :)
+        full_names = names
+      })
+    })
+  });
+});
+
+
+// Oh God, Promise :)
+const asyncGetRequest = (token) => {
+  return new Promise((resolve, reject) => {
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', 'https://api.github.com/user/repos?per_page=100')
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.onload = () => resolve(xhr)
+    xhr.send()
+  })
+}
+
+const asyncGetRequestWithPage = (token, page) => {
+  return new Promise((resolve, reject) => {
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', 'https://api.github.com/user/repos?per_page=100' + '&page=' + String(page))
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.onload = () => resolve(xhr)
+    xhr.send()
+  })
+}
+
 
 // Keyup
 let keyup_stack = []
@@ -36,7 +102,7 @@ keyword.addEventListener('keyup', function(){
       if (keyup_stack.length === 0) {
         searchRepositories(this.value)
       }
-    }.bind(this), 300)
+    }.bind(this), 250)
   }
 
 })
@@ -49,10 +115,6 @@ const searchRepositories = (word) => {
   const list = full_names.filter((d) => {
     return reg.test(d)
   })
-
-  // NOTE: It's not "for in" :)
-  const ul = document.getElementById('Ul')
-  // NOTE: I think it's better than removeChild.
   ul.innerHTML = ''
   for (const [i, repo] of list.entries()) {
     appendLink(i, repo, ul)
@@ -60,7 +122,7 @@ const searchRepositories = (word) => {
   addEventForClick()
 }
 
-var appendLink = (i, repo, ul) => {
+const appendLink = (i, repo, ul) => {
   const li = document.createElement('li')
   li.innerText = repo
   li.dataset.repo = repo // 知見
@@ -71,7 +133,7 @@ var appendLink = (i, repo, ul) => {
   ul.appendChild(li)
 }
 
-var addEventForClick = () => {
+const addEventForClick = () => {
   const repos = document.querySelectorAll('[data-repo]')
   Array.from(repos).forEach(repo => {
     repo.addEventListener('click', function(event) {
@@ -84,60 +146,3 @@ var addEventForClick = () => {
     });
   });
 }
-
-// DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function(e) {
-
-  var token
-  chrome.storage.sync.get('token', function(v){
-    token = v.token
-    let last_page = 1
-
-    asyncGetRequest(token).then((xhr) => {
-      const link = xhr.getResponseHeader('link')
-      last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
-      return last_page
-    }).then((last_page) => {
-      let promises = []
-
-      for (let i=1; i<last_page+1; i++) {
-
-        // It's not correct order...
-        promises.push(asyncGetRequestWithPage(token, i).then((xhr) => {
-          const ary = JSON.parse(xhr.responseText)
-          for (const v of ary) {
-            full_names.push(v.full_name)
-          }
-        }));
-      } // end for
-
-      Promise.all(promises).then(() => {
-        console.log(full_names);
-      })
-
-    })
-  });
-
-
-  // Oh God, Promise :)
-  const asyncGetRequest = (token) => {
-    return new Promise((resolve, reject) => {
-      var xhr = new XMLHttpRequest()
-      xhr.open('GET', 'https://api.github.com/user/repos?per_page=100')
-      xhr.setRequestHeader('Authorization', 'token ' + token);
-      xhr.onload = () => resolve(xhr)
-      xhr.send()
-    })
-  }
-
-  const asyncGetRequestWithPage = (token, page) => {
-    return new Promise((resolve, reject) => {
-      var xhr = new XMLHttpRequest()
-      xhr.open('GET', 'https://api.github.com/user/repos?per_page=100' + '&page=' + String(page))
-      xhr.setRequestHeader('Authorization', 'token ' + token);
-      xhr.onload = () => resolve(xhr)
-      xhr.send()
-    })
-  }
-
-});

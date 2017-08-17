@@ -1,6 +1,6 @@
 {
   "name": "Octojump",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "manifest_version": 2,
   "description": "Jump to GitHub repository page.",
   "icons": {
@@ -9,8 +9,10 @@
   },
   "default_locale": "en",
   "background": {
+    "persistent": false,
     "scripts": [
       "scripts/chromereload.js",
+      "scripts/eventPage.js",
       "scripts/background.js"
     ]
   },
