@@ -3,7 +3,14 @@
 // Repository full_name array
 let full_names = []
 
-const ul = document.getElementById('Ul')
+let token = '' // この名前わかりづらいかも
+const info     = document.getElementById('Info')
+const search   = document.getElementById('Search')
+const input    = document.getElementById('Input')
+const setBtn   = document.getElementById('SetBtn')
+const checkBtn = document.getElementById('CheckBtn')
+const checkBox = document.getElementById('CheckBox')
+const ul       = document.getElementById('Ul')
 
 
 // DOMContentLoaded
@@ -11,36 +18,40 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
   // ここで データを入れてしまう作戦
   chrome.storage.sync.get('full_names', (v) => {
-    console.log('full_names');
-    console.log(v.full_names);
     full_names = v.full_names
-
-    // ここで初期表示
-    const list = full_names
     ul.innerHTML = ''
-    for (const [i, repo] of list.entries()) {
+    for (const [i, repo] of full_names.entries()) {
       appendLink(i, repo, ul)
     }
     addEventForClick()
   })
 
-  // popup が開くたびに更新の戦略。
-  chrome.storage.sync.get('token', (v) => {
-    const token = v.token
-    requestGithub(token).then((names)=>{
-      setSearchInput(token)
-      input.value = ''
-      chrome.storage.sync.set({'full_names': names})
-
-      // NOTE: この一行が token.js とことなる。
-      full_names = names
-      console.log('requestGithub が成功');
-      console.log(full_names);
-    }, () => {
-      console.log('requestGithub が失敗');
-    })
+  loadToken().then((token) => {
+    // input の制御
+    setSearchInput(token)
+    // 地球のはじまり
+    updateFullNames(token)
   })
+
 })
+
+// ここが地球のはじまり
+const updateFullNames = (token) => {
+  requestGithub(token).then((names)=>{
+    setSearchInput(token)
+    input.value = ''
+    chrome.storage.sync.set({'full_names': names})
+
+    // NOTE: この一行が token.js とことなる。
+    full_names = names
+    console.log('requestGithub が成功です');
+    console.log(full_names);
+    // TODO: // ここはちょっと冗長。。。。
+    chrome.storage.sync.set({'token': token})
+  }, () => {
+    console.log('requestGithub が失敗です');
+  })
+}
 
 ////////////////////////////////////
 // ここが一番重要で重い処理
@@ -101,8 +112,7 @@ const asyncGetRequestWithPage = (token, page) => {
 
 // Keyup
 let keyup_stack = []
-const keyword = document.getElementById('Search')
-keyword.addEventListener('keyup', function(){
+search.addEventListener('keyup', function(){
 
   // When click Enter key
   if (event.keyCode === 13) { // 知見
@@ -174,4 +184,54 @@ const addEventForClick = () => {
       chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
     });
   });
+}
+
+
+const setSearchInput = (token) => {
+  if ((typeof token === 'undefined') ||
+              token.trim().length === 0) {
+    disableSearch()
+  } else {
+    enableSearch()
+  }
+}
+
+// Load token
+const loadToken = () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get('token', (v) => {
+      token = v.token
+      resolve(token)
+    })
+  })
+}
+
+
+// Set Token
+setBtn.addEventListener('click', () => {
+  const token = input.value
+  // 地球のはじまり
+  updateFullNames(token)
+})
+
+// Check Token
+checkBtn.addEventListener('click', () => {
+  loadToken().then((token) => {
+    displayToken(token)
+  })
+})
+
+const disableSearch = () => {
+  info.innerText = 'Set your access token'
+  search.className = 'disable'
+}
+
+const enableSearch = () => {
+  info.innerHTML = ''
+  search.className = ''
+}
+
+const displayToken = (token) => {
+  const v = token || 'token is undefined'
+  checkBox.innerText = v
 }
