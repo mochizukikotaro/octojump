@@ -2,7 +2,9 @@
 
 ![octojump-128](https://user-images.githubusercontent.com/7911481/29446681-76cc223c-8428-11e7-9bc6-99600209902d.png)
 
-Chrome extension to jump to GitHub
+Chrome extension to jump to GitHub.
+https://chrome.google.com/webstore/detail/octojump/ipddbipniemmmklkjabimbmnaejmnngn
+
 
 # All you have to do is ...
 
