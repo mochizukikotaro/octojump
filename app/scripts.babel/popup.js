@@ -106,7 +106,7 @@ const asyncGetRequestWithPage = (token, page) => {
     const url = 'https://api.github.com/user/repos?per_page=100'
                 + '&page=' + String(page)
     xhr.open('GET', url)
-    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.setRequestHeader('Authorization', 'token ' + encodeURI(token));
     xhr.onload = () => resolve(xhr)
     xhr.send()
   })
