@@ -3,7 +3,6 @@
 // Repository full_name array
 let full_names = []
 
-let token = '' // この名前わかりづらいかも
 const info     = document.getElementById('Info')
 const loading  = document.getElementById('Loading')
 const search   = document.getElementById('Search')
@@ -20,6 +19,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
   // ここで データを入れてしまう作戦
   chrome.storage.sync.get('full_names', (v) => {
     full_names = v.full_names
+    if (typeof full_names === 'undefined') {
+      return
+    }
     ul.innerHTML = ''
     for (const [i, repo] of full_names.entries()) {
       appendLink(i, repo)
@@ -28,31 +30,29 @@ document.addEventListener('DOMContentLoaded', (e) => {
   })
 
   loadToken().then((token) => {
-    // input の制御
     setSearchInput(token)
-    // 地球のはじまり
     updateFullNames(token)
   })
 
 })
 
-// ここが地球のはじまり
 const updateFullNames = (token) => {
-  requestGithub(token).then((names)=>{
-    setSearchInput(token)
-    input.value = ''
-    chrome.storage.sync.set({'full_names': names})
 
-    // NOTE: この一行が token.js とことなる。
-    full_names = names
-    console.log('requestGithub が成功です');
-    console.log(full_names);
-    // TODO: // ここはちょっと冗長。。。。
-    chrome.storage.sync.set({'token': token})
-    loading.className = 'disable'
-  }, () => {
-    console.log('requestGithub が失敗です');
-    loading.className = 'disable'
+  // NOTE: nest...
+  return new Promise((result, reject) => {
+
+    requestGithub(token).then((names)=>{
+      input.value = ''
+      chrome.storage.sync.set({'full_names': names})
+      full_names = names
+      console.log('requestGithub が成功です');
+      loading.className = 'disable'
+      result(names)
+    }, () => {
+      console.log('requestGithub が失敗です');
+      loading.className = 'disable'
+      reject()
+    })
   })
 }
 
@@ -203,7 +203,7 @@ const setSearchInput = (token) => {
 const loadToken = () => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get('token', (v) => {
-      token = v.token
+      const token = v.token
       resolve(token)
     })
   })
@@ -213,9 +213,16 @@ const loadToken = () => {
 // Set Token
 setBtn.addEventListener('click', () => {
   loading.className = ''
-  const token = input.value
-  // 地球のはじまり
-  updateFullNames(token)
+  const new_token = input.value
+  updateFullNames(new_token).then((full_names) => {
+    chrome.storage.sync.set({'token': new_token})
+    setSearchInput(new_token)
+    ul.innerHTML = ''
+    for (const [i, repo] of full_names.entries()) {
+      appendLink(i, repo)
+    }
+    addEventForClick()
+  })
 })
 
 // Check Token
