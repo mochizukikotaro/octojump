@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
     full_names = v.full_names
     ul.innerHTML = ''
     for (const [i, repo] of full_names.entries()) {
-      appendLink(i, repo, ul)
+      appendLink(i, repo)
     }
     addEventForClick()
   })
@@ -159,12 +159,12 @@ const searchRepositories = (word) => {
   })
   ul.innerHTML = ''
   for (const [i, repo] of list.entries()) {
-    appendLink(i, repo, ul)
+    appendLink(i, repo)
   }
   addEventForClick()
 }
 
-const appendLink = (i, repo, ul) => {
+const appendLink = (i, repo) => {
   const li = document.createElement('li')
   li.innerText = repo
   li.dataset.repo = repo // 知見
