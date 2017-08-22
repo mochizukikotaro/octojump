@@ -22,11 +22,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
     if (typeof full_names === 'undefined') {
       return
     }
-    ul.innerHTML = ''
-    for (const [i, repo] of full_names.entries()) {
-      appendLink(i, repo)
-    }
-    addEventForClick()
+    updateList(full_names)
   })
 
   loadToken().then((token) => {
@@ -157,11 +153,7 @@ const searchRepositories = (word) => {
   const list = full_names.filter((d) => {
     return reg.test(d)
   })
-  ul.innerHTML = ''
-  for (const [i, repo] of list.entries()) {
-    appendLink(i, repo)
-  }
-  addEventForClick()
+  updateList(list)
 }
 
 const appendLink = (i, repo) => {
@@ -217,11 +209,9 @@ setBtn.addEventListener('click', () => {
   updateFullNames(new_token).then((full_names) => {
     chrome.storage.sync.set({'token': new_token})
     setSearchInput(new_token)
-    ul.innerHTML = ''
-    for (const [i, repo] of full_names.entries()) {
-      appendLink(i, repo)
-    }
-    addEventForClick()
+    updateList(full_names)
+  }, () => {
+    // ここじゃない
   })
 })
 
@@ -231,6 +221,15 @@ checkBtn.addEventListener('click', () => {
     displayToken(token)
   })
 })
+
+
+const updateList = (names) => {
+  ul.innerHTML = ''
+  for (const [i, repo] of names.entries()) {
+    appendLink(i, repo)
+  }
+  addEventForClick()
+}
 
 const disableSearch = () => {
   info.innerText = 'Set your access token'
