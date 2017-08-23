@@ -11,16 +11,23 @@ body {
   background-color: #e8eaed;
 }
 
-.container {
-  padding: 0;
-  margin: 0;
+.octojump {
+  .container {
+    padding: 0;
+    margin: 0;
+  }
+
+  .powered {
+    text-align: right;
+    margin: 10px;
+    font-size: 10px;
+  }
+
+  .disable {
+    display: none;
+  }
 }
 
-.powered {
-  text-align: right;
-  margin: 10px;
-  font-size: 10px;
-}
 
 
 #Search {
@@ -30,9 +37,6 @@ body {
   width: 100%;
   font-size: 16px;
   line-height: 24px;
-  &.disable {
-    display: none
-  }
 }
 
 #Ul {
@@ -61,9 +65,6 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  &.disable {
-    display: none;
-  }
 }
 
 // 45afdf8d35ad54ebd25f44e4357fba3d03cc808e
