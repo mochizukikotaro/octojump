@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
   })
 
   loadToken().then((token) => {
-    setSearchInput(token)
+    displaySearch(token)
     updateFullNames(token)
   })
 
@@ -163,7 +163,6 @@ const appendLink = (i, repo) => {
   if (i === 0) {
     li.id = 'focus' // 知見
   }
-
   ul.appendChild(li)
 }
 
@@ -181,16 +180,6 @@ const addEventForClick = () => {
   });
 }
 
-
-const setSearchInput = (token) => {
-  if ((typeof token === 'undefined') ||
-              token.trim().length === 0) {
-    disableSearch()
-  } else {
-    enableSearch()
-  }
-}
-
 // Load token
 const loadToken = () => {
   return new Promise((resolve, reject) => {
@@ -201,17 +190,14 @@ const loadToken = () => {
   })
 }
 
-
 // Set Token
 setBtn.addEventListener('click', () => {
   loading.className = ''
   const new_token = input.value
   updateFullNames(new_token).then((full_names) => {
     chrome.storage.sync.set({'token': new_token})
-    setSearchInput(new_token)
+    displaySearch(new_token)
     updateList(full_names)
-  }, () => {
-    // ここじゃない
   })
 })
 
@@ -231,14 +217,25 @@ const updateList = (names) => {
   addEventForClick()
 }
 
+const displaySearch = (token) => {
+  if ((typeof token === 'undefined') ||
+              token.trim().length === 0) {
+    disableSearch()
+  } else {
+    enableSearch()
+  }
+}
+
 const disableSearch = () => {
   info.innerText = 'Set your access token'
   search.className = 'disable'
+  checkBtn.className = 'disable'
 }
 
 const enableSearch = () => {
   info.innerHTML = ''
   search.className = ''
+  checkBtn.className = ''
 }
 
 const displayToken = (token) => {
