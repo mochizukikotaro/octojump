@@ -16,7 +16,6 @@ const ul       = document.getElementById('Ul')
 // DOMContentLoaded
 document.addEventListener('DOMContentLoaded', (e) => {
 
-  // ここで データを入れてしまう作戦
   chrome.storage.sync.get('full_names', (v) => {
     full_names = v.full_names
     if (typeof full_names === 'undefined') {
@@ -53,8 +52,7 @@ const updateFullNames = (token) => {
 }
 
 ////////////////////////////////////
-// ここが一番重要で重い処理
-// token セット時 storage に入れちゃう作戦
+// Request GitHub to get repo full_names
 ////////////////////////////////////
 const requestGithub = (token) => {
   return new Promise((resolve, reject) => {
@@ -63,31 +61,28 @@ const requestGithub = (token) => {
       .then((xhr) => {
         const message = JSON.parse(xhr.responseText)['message']
 
-        ////////////////////
-        // token が正しくない場合！！！　これがやりたい
+        // Bad credentials
         if (typeof message !== undefined &&
             message === 'Bad credentials') {
           console.log(message);
           reject()
           return
         }
-        ////////////////////
-
 
         const link = xhr.getResponseHeader('link')
         const last_page =  Number(link.replace(/^.*&page=(\d).*$/, '$1'))
         let promises = []
         let names = []
-        for (let i=1; i<last_page+1; i++) {
 
-          // It's not correct order...
+        for (let i=1; i<last_page+1; i++) {
           promises.push(asyncGetRequestWithPage(token, i).then((xhr) => {
             const ary = JSON.parse(xhr.responseText)
             for (const v of ary) {
               names.push(v.full_name)
             }
           }));
-        } // end for
+        }
+
         Promise.all(promises).then(() => {
           full_names = names
           resolve(full_names)
@@ -114,7 +109,7 @@ let keyup_stack = []
 search.addEventListener('keyup', function(){
 
   // When click Enter key
-  if (event.keyCode === 13) { // 知見
+  if (event.keyCode === 13) {
     const focus = document.getElementById('focus')
     document.getElementById('focus').click();
 
@@ -159,9 +154,9 @@ const searchRepositories = (word) => {
 const appendLink = (i, repo) => {
   const li = document.createElement('li')
   li.innerText = repo
-  li.dataset.repo = repo // 知見
+  li.dataset.repo = repo
   if (i === 0) {
-    li.id = 'focus' // 知見
+    li.id = 'focus'
   }
   ul.appendChild(li)
 }
@@ -174,7 +169,7 @@ const addEventForClick = () => {
       console.log(this.dataset.repo);
       const full_name = this.dataset.repo
 
-      // NOTE: 新しいタブが開く
+      // NOTE: New tab
       chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
     });
   });
