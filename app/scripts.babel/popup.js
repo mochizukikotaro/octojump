@@ -169,10 +169,37 @@ const addEventForClick = () => {
       console.log(this.dataset.repo);
       const full_name = this.dataset.repo
 
-      // NOTE: New tab
-      chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
+      // よくクリックされるリポジトリを上位表示するためクリック数を保存
+      saveClickedReposHistory(full_name)
+
+      // NOTE: 新しいタブが開く
+      //chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
     });
   });
+}
+
+const saveClickedReposHistory = (repo) => {
+  const key_name = repo + '::JumpedCnt'
+  const clicked_count = getClickedCnt(key_name)
+
+  clicked_count.then((cnt) => {
+    let obj = {}
+    if(cnt === 'undefined') {
+      obj[key_name] = 1
+      chrome.storage.sync.set(obj)
+    } else {
+      obj[key_name] = cnt + 1
+      chrome.storage.sync.set(obj)
+    }
+  })
+}
+
+const getClickedCnt = (key_name) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(key_name, (v) => {
+      key_name ? resolve(v[key_name]) : reject(v);
+    })
+  })
 }
 
 // Load token
