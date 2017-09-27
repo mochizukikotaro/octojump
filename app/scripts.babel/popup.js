@@ -145,10 +145,21 @@ const searchRepositories = (word) => {
                 .replace(/\s/, '.*')
                 .replace(/(.*)/, '.*$1.*')
   var reg = new RegExp(buf);
-  const list = full_names.filter((d) => {
-    return reg.test(d)
+
+  findClickedRepos().then((repos) => {
+    repos.sort((a,b) => {
+      if (a.cnt < b.cnt) return 1
+      if (a.cnt > b.cnt) return -1
+      return 0
+    })
+    const repo_list = repos.map(v => v.name)
+    const sorted_list = sortRepos(repo_list, full_names)
+
+    const list = sorted_list.filter((d) => {
+      return reg.test(d)
+    })
+    updateList(list)
   })
-  updateList(list)
 }
 
 const appendLink = (i, repo) => {
@@ -159,6 +170,25 @@ const appendLink = (i, repo) => {
     li.id = 'focus'
   }
   ul.appendChild(li)
+}
+
+const findClickedRepos = () => new Promise((resolve) => {
+  let clicked_repos = []
+  chrome.storage.sync.get(null, (v) => {
+    for (const key in v) {
+      if (key.match(/::JumpedCnt/gi)) {
+        const repo = key.replace(/::JumpedCnt/gi, '')
+        const clicked_repo = { 'name': repo, 'cnt': v[key] }
+        clicked_repos.push(clicked_repo)
+      }
+    }
+
+    resolve(clicked_repos)
+  })
+})
+
+const sortRepos = (clickedRepos, allRepos) => {
+  return Array.from(new Set(clickedRepos.concat(allRepos)))
 }
 
 const addEventForClick = () => {
@@ -173,7 +203,7 @@ const addEventForClick = () => {
       saveClickedReposHistory(full_name)
 
       // NOTE: 新しいタブが開く
-      //chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
+      chrome.tabs.create({ url: 'https://github.com/' + full_name + '/'})
     });
   });
 }
