@@ -210,25 +210,17 @@ const addEventForClick = () => {
 
 const saveClickedReposHistory = (repo) => {
   const key_name = repo + '::JumpedCnt'
-  const clicked_count = getClickedCnt(key_name)
 
-  clicked_count.then((cnt) => {
+  getClickedCnt(key_name).then((cnt) => {
     let obj = {}
-    if(cnt === 'undefined') {
-      obj[key_name] = 1
-      chrome.storage.sync.set(obj)
-    } else {
-      obj[key_name] = cnt + 1
-      chrome.storage.sync.set(obj)
-    }
+    obj[key_name] = cnt === undefined ? 1 : cnt + 1
+    chrome.storage.sync.set(obj)
   })
 }
 
 const getClickedCnt = (key_name) => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get(key_name, (v) => {
-      key_name ? resolve(v[key_name]) : reject(v);
-    })
+    chrome.storage.sync.get(null, (v) => { resolve(v[key_name]) })
   })
 }
 
