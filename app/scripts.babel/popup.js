@@ -144,7 +144,7 @@ const searchRepositories = (word) => {
   var buf = word.replace(/\//, '.*\/.*')
                 .replace(/\s/, '.*')
                 .replace(/(.*)/, '.*$1.*')
-  var reg = new RegExp(buf);
+  var reg = new RegExp(buf, 'i');
 
   findClickedRepos().then((repos) => {
     repos.sort((a,b) => {
