@@ -15,7 +15,7 @@ const ul       = document.getElementById('Ul')
 
 // DOMContentLoaded
 document.addEventListener('DOMContentLoaded', (e) => {
-
+  search.focus()
   chrome.storage.sync.get('full_names', (v) => {
     full_names = v.full_names
     if (typeof full_names === 'undefined') {
